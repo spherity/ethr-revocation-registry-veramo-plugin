@@ -1,0 +1,41 @@
+{
+  "name": "@spherity/ethr-status-registry",
+  "version": "1.0.0",
+  "description": "A plugin for the Veramo agent enabling it to resolve EthrStatusRegistry VC revocation information",
+  "scripts": {
+    "test": "npm run test",
+    "build": "tsc",
+    "format": "prettier --write \"src/**/*.ts\" \"src/**/*.js\"",
+    "lint": "tslint -p tsconfig.json"
+  },
+  "files": ["lib/**/*"],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/spherity/ethr-status-registry.git"
+  },
+  "keywords": [
+    "veramo",
+    "verifiable",
+    "credentials",
+    "ethereum",
+    "status",
+    "registry",
+    "eip-5539"
+  ],
+  "author": "Philipp Bolte <philipp@bolte.id> (https://bolte.id)",
+  "contributors": [
+    "Dennis von der Bey <dennis@vonderbey.eu> (https://vonderbey.eu)",
+    "Lauritz Leifermann <lauritz.leifermann@spherity.com> (https://spherity.com)"
+  ],
+  "license": "GPL-3.0-only",
+  "bugs": {
+    "url": "https://github.com/spherity/ethr-status-registry/issues"
+  },
+  "homepage": "https://github.com/spherity/ethr-status-registry#readme",
+  "devDependencies": {
+    "prettier": "^2.7.1",
+    "tslint": "^6.1.3",
+    "tslint-config-prettier": "^1.18.0",
+    "typescript": "^4.8.3"
+  }
+}

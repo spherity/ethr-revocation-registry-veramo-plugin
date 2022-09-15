@@ -5,6 +5,7 @@
     "module": "commonjs",
     "target": "ES2021",
     "moduleResolution": "node",
+    "strict": true,
     "esModuleInterop": true,
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,

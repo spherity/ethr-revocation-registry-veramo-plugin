@@ -12,13 +12,12 @@ export class EthrRevocationRegistry implements StatusResolver{
   provider: JsonRpcProvider;
   controller: EthereumRevocationRegistryController;
 
-  constructor(infuraProjectId: string, networkName: string, registryAddress: string) {
+  constructor(infuraProjectId?: string, networkName?: string, registryAddress?: string) {
     this.provider = new ethers.providers.JsonRpcProvider(`https://${networkName}.infura.io/v3/${infuraProjectId}`);
     const config: EthereumRevocationRegistryControllerConfig = {
       provider: this.provider,
       address: registryAddress
     }
-
     this.controller = new EthereumRevocationRegistryController(config)
   }
   checkStatus: StatusMethod = async (credential: CredentialJwtOrJSON) => {

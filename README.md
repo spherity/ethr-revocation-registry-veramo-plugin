@@ -10,10 +10,12 @@ A [`CredentialStatusPlugin`](https://github.com/uport-project/veramo/tree/next/p
    
 2. Add the plugin to your agent
     ```typescript
-   import {CredentialStatusPlugin} from "@veramo/credential-status";
-   import { EthrRevocationRegistry } from '@spherity/tbd...';
+   import { CredentialStatusPlugin } from "@veramo/credential-status";
+   import { EthrRevocationRegistry } from "@spherity/tbd...";
+   ...
     
-   const agent = new Agent({
+   export const veramoAgent = createAgent<VeramoAgent>({
+      ...,
       plugins: [
         new CredentialStatusPlugin({
           ...new EthrRevocationRegistry(

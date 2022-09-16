@@ -6,7 +6,7 @@ module.exports = {
   transform: {
     '^.+\\.tsx?$': 'ts-jest',
   },
-  collectCoverageFrom: ['src/**/*.(t|j)s'],
+  collectCoverageFrom: ['src/**/*.(t|j)s', '!src/index.ts'],
   coverageReporters:
     process.env.CI === 'true'
       ? ['text-summary', 'cobertura']

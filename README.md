@@ -20,7 +20,6 @@ A [`CredentialStatusPlugin`](https://github.com/uport-project/veramo/tree/next/p
         new CredentialStatusPlugin({
           ...new EthrRevocationRegistry(
             "00000000000000",                            // infuraProjectId
-            "goerli",                                    // network name
             "0x185D1Cf733e2C85A7Eda4f188036baA5b7a11182" // revocation registry address
           ).asStatusMethod
         }),   
@@ -57,7 +56,8 @@ async function main() {
     },
     "credentialStatus": {
       "id": "...",
-      "type": "EthrRevocationRegistry",
+      "type": "EthrRevocationRegistry", 
+      "chainId": 5, // optional. defaults to 1 (mainnet)
       "namespace": "0x6B6B873eaB06D331fFA6c431aC874Ff954A2c317",
       "revocationList": "0x3458b9bfc7963978b7d40ef225177c45193c2889902357db3b043a4e319a9628",
       "revocationKey": "0x89343794d2fb7dd5d0fba9593a4bb13beaff93a61577029176d0117b0c53b8e6"

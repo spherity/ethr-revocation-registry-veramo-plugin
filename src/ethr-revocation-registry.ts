@@ -1,25 +1,47 @@
 import { CredentialJwtOrJSON, StatusMethod, StatusResolver } from 'credential-status';
 import {
   EthereumRevocationRegistryController,
-  EthereumRevocationRegistryControllerConfig,
 } from '@spherity/ethr-revocation-registry-controller';
 import { ethers } from 'ethers';
-import { JsonRpcProvider } from '@ethersproject/providers';
 import { decodeJWT } from 'did-jwt';
 import { StatusEntry } from 'credential-status/src';
 
-export class EthrRevocationRegistry implements StatusResolver {
-  provider: JsonRpcProvider;
-  controller: EthereumRevocationRegistryController;
+type ChainControllers = {
+  [chainId: number]: EthereumRevocationRegistryController;
+};
 
-  constructor(infuraProjectId?: string, networkName?: string, registryAddress?: string) {
-    this.provider = new ethers.providers.JsonRpcProvider(`https://${networkName}.infura.io/v3/${infuraProjectId}`);
-    const config: EthereumRevocationRegistryControllerConfig = {
-      provider: this.provider,
-      address: registryAddress,
+export class EthrRevocationRegistry implements StatusResolver {
+  controllers: ChainControllers;
+
+  constructor(infuraProjectId?: string, registryAddress?: string) {
+    this.controllers = {
+      1: new EthereumRevocationRegistryController({
+        address: registryAddress,
+        provider: new ethers.providers.JsonRpcProvider(`https://mainnet.infura.io/v3/${infuraProjectId}`),
+      }),
+      3: new EthereumRevocationRegistryController({
+        address: registryAddress,
+        provider: new ethers.providers.JsonRpcProvider(`https://ropsten.infura.io/v3/${infuraProjectId}`),
+      }),
+      42: new EthereumRevocationRegistryController({
+        address: registryAddress,
+        provider: new ethers.providers.JsonRpcProvider(`https://kovan.infura.io/v3/${infuraProjectId}`),
+      }),
+      4: new EthereumRevocationRegistryController({
+        address: registryAddress,
+        provider: new ethers.providers.JsonRpcProvider(`https://rinkeby.infura.io/v3/${infuraProjectId}`),
+      }),
+      5: new EthereumRevocationRegistryController({
+        address: registryAddress,
+        provider: new ethers.providers.JsonRpcProvider(`https://goerli.infura.io/v3/${infuraProjectId}`),
+      }),
+      11155111: new EthereumRevocationRegistryController({
+        address: registryAddress,
+        provider: new ethers.providers.JsonRpcProvider(`https://sepolia.infura.io/v3/${infuraProjectId}`),
+      }),
     };
-    this.controller = new EthereumRevocationRegistryController(config);
   }
+
   checkStatus: StatusMethod = async (credential: CredentialJwtOrJSON) => {
     let statusEntry: StatusEntry | undefined;
     if (typeof credential === 'string') {
@@ -51,11 +73,22 @@ export class EthrRevocationRegistry implements StatusResolver {
         'bad_request: credentialStatus entry is not formatted correctly. Validity can not be determined.',
       );
     }
-    const revoked = await this.controller.isRevoked({
-      namespace: statusEntry.namespace,
-      list: statusEntry.revocationList,
-      revocationKey: statusEntry.revocationKey,
-    });
+    let revoked: boolean;
+    if (statusEntry.chainId && !this.controllers[statusEntry.chainId]) {
+      throw new Error('bad_request: chainId is not supported');
+    } else if (!statusEntry.chainId) {
+      revoked = await this.controllers[1].isRevoked({
+        namespace: statusEntry.namespace,
+        list: statusEntry.revocationList,
+        revocationKey: statusEntry.revocationKey,
+      });
+    } else {
+      revoked = await this.controllers[statusEntry.chainId].isRevoked({
+        namespace: statusEntry.namespace,
+        list: statusEntry.revocationList,
+        revocationKey: statusEntry.revocationKey,
+      });
+    }
     return { revoked };
   };
   asStatusMethod = { EthrRevocationRegistry: this.checkStatus };

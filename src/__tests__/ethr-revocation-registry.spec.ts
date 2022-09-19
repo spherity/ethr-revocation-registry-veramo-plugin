@@ -12,7 +12,7 @@ describe('EthrRevocationRegistryPlugin', () => {
   const didDoc = {} as DIDDocument;
 
   beforeEach(() => {
-    pluginInstance = new EthrRevocationRegistry('', '', '');
+    pluginInstance = new EthrRevocationRegistry('', '');
   });
 
   it('should return a status method when supplied a credential object', async () => {
@@ -71,6 +71,37 @@ describe('EthrRevocationRegistryPlugin', () => {
     const credential = `{ "credentialStatus": { "id": "", "namespace": "${extractedNamespace}", "revocationList": "${extractedRevocationList}", "revocationList": "${extractedRevocationList}", "revocationKey": "${extractedRevocationKey}"}}`;
     await expect(pluginInstance.checkStatus(credential, didDoc)).rejects.toEqual(
       new Error('bad_request: credentialStatus entry is not formatted correctly. Validity can not be determined.'),
+    );
+  });
+
+  it('should handle credential with explicit chainId', async () => {
+    const credential = {
+      credentialStatus: {
+        id: '0',
+        type: 'EthrRevocationRegistry',
+        chainId: 11155111,
+        revocationKey: '0x89343794d2fb7dd5d0fba9593a4bb13beaff93a61577029176d0117b0c53b8e6',
+        revocationList: '0x3458b9bfc7963978b7d40ef225177c45193c2889902357db3b043a4e319a9627',
+        namespace: '0x6B6B873eaB06D331fFA6c431aC874Ff954A2c317',
+      },
+    };
+    const result = await pluginInstance.checkStatus(credential, didDoc);
+    expect(result).toEqual({ revoked: false });
+  });
+
+  it('should throw error for credential with unsupported chainId', async () => {
+    const credential = {
+      credentialStatus: {
+        id: '0',
+        type: 'EthrRevocationRegistry',
+        chainId: 9999999999999,
+        revocationKey: '0x89343794d2fb7dd5d0fba9593a4bb13beaff93a61577029176d0117b0c53b8e6',
+        revocationList: '0x3458b9bfc7963978b7d40ef225177c45193c2889902357db3b043a4e319a9627',
+        namespace: '0x6B6B873eaB06D331fFA6c431aC874Ff954A2c317',
+      },
+    };
+    await expect(pluginInstance.checkStatus(credential, didDoc)).rejects.toEqual(
+      new Error('bad_request: chainId is not supported'),
     );
   });
 });

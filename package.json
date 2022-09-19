@@ -1,5 +1,5 @@
 {
-  "name": "@spherity/ethr-revocation-registry-plugin",
+  "name": "@spherity/ethr-revocation-registry-veramo-plugin",
   "version": "1.0.0",
   "description": "A plugin for the Veramo agent enabling it to resolve EthrStatusRegistry VC revocation information",
   "main": "dist/src/index.js",

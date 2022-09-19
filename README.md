@@ -5,7 +5,7 @@ A [`CredentialStatusPlugin`](https://github.com/uport-project/veramo/tree/next/p
 
 1. Install this plugin
     ```bash
-    npm install --save @spherity/tbd @veramo/credential-status
+    npm install --save @spherity/ethr-revocation-registry-veramo-plugin @veramo/credential-status
     ```
    
 2. Add the plugin to your agent

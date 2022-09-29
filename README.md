@@ -70,7 +70,8 @@ async function main() {
     },
     "credentialStatus": {
       "id": "...",
-      "type": "EthrRevocationRegistry", 
+      "type": "EthrRevocationRegistry",
+      "registry": "0x0000000000000000000000000000000000000000" // optional. defaults to defaultRegistryAddress
       "chainId": 5, // optional. defaults to 1 (mainnet)
       "namespace": "0x6B6B873eaB06D331fFA6c431aC874Ff954A2c317",
       "revocationList": "0x3458b9bfc7963978b7d40ef225177c45193c2889902357db3b043a4e319a9628",

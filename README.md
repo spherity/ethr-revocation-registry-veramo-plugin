@@ -11,18 +11,32 @@ A [`CredentialStatusPlugin`](https://github.com/uport-project/veramo/tree/next/p
 2. Add the plugin to your agent
     ```typescript
    import { CredentialStatusPlugin } from "@veramo/credential-status";
-   import { EthrRevocationRegistry } from "@spherity/tbd...";
+   import { EthrRevocationRegistry } from "@spherity/ethr-revocation-registry-veramo-plugin;
    ...
     
    export const veramoAgent = createAgent<VeramoAgent>({
       ...,
       plugins: [
         new CredentialStatusPlugin({
-          ...new EthrRevocationRegistry(
-            "00000000000000",                            // infuraProjectId
-            "0x185D1Cf733e2C85A7Eda4f188036baA5b7a11182" // revocation registry address
-          ).asStatusMethod
-        }),   
+          ...new EthrRevocationRegistry({
+            infuraProjectId: "abcde123",                            
+            defaultRegistryAddress: "0x0000000000000000000000000000000000000000"
+          }).asStatusMethod,
+          // OR
+          ...new EthrRevocationRegistry({
+            defaultRegistryAddress: "0x0000000000000000000000000000000000000000",
+            chainConnectionInstruction: [
+              {
+                chainId: 1337,
+                provider: new ethers.providers.JsonRpcProvider('http://127.0.0.1:8545')
+              },
+              {
+                chainId: 1,
+                provider: new ethers.providers.JsonRpcProvider('http://example.mainnet.quiknode.pro/token/')
+              },             
+            ]
+          }).asStatusMethod
+        }),           
       ],
     });
     ```

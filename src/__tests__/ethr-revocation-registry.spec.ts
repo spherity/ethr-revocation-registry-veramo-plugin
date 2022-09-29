@@ -1,5 +1,6 @@
 import { EthrRevocationRegistry } from '../ethr-revocation-registry';
 import { DIDDocument } from '@veramo/core';
+import { ethers } from 'ethers';
 
 jest.mock('@spherity/ethr-revocation-registry-controller', () => ({
   EthereumRevocationRegistryController: jest.fn().mockImplementation(() => ({
@@ -12,7 +13,7 @@ describe('EthrRevocationRegistryPlugin', () => {
   const didDoc = {} as DIDDocument;
 
   beforeEach(() => {
-    pluginInstance = new EthrRevocationRegistry('', '');
+    pluginInstance = new EthrRevocationRegistry({ infuraProjectId: '1', defaultRegistryAddress: '1' });
   });
 
   it('should return a status method when supplied a credential object', async () => {
@@ -70,7 +71,7 @@ describe('EthrRevocationRegistryPlugin', () => {
     const extractedRevocationKey = '0x89343794d2fb7dd5d0fba9593a4bb13beaff93a61577029176d0117b0c53b8e6';
     const credential = `{ "credentialStatus": { "id": "", "namespace": "${extractedNamespace}", "revocationList": "${extractedRevocationList}", "revocationList": "${extractedRevocationList}", "revocationKey": "${extractedRevocationKey}"}}`;
     await expect(pluginInstance.checkStatus(credential, didDoc)).rejects.toEqual(
-      new Error('bad_request: credentialStatus entry is not formatted correctly. Validity can not be determined.'),
+      new Error('credentialStatus entry is not formatted correctly. Validity can not be determined.'),
     );
   });
 
@@ -89,6 +90,51 @@ describe('EthrRevocationRegistryPlugin', () => {
     expect(result).toEqual({ revoked: false });
   });
 
+  it('should handle check when provided a custom provider', async () => {
+    const newPluginInstance = new EthrRevocationRegistry({
+      defaultRegistryAddress: '0x',
+      chainConnectionInstructions: [{
+        chainId: 7777,
+        provider: new ethers.providers.JsonRpcProvider('')
+      }]
+    })
+
+    const credential = {
+      credentialStatus: {
+        id: '0',
+        type: 'EthrRevocationRegistry',
+        chainId: 7777,
+        revocationKey: '0x89343794d2fb7dd5d0fba9593a4bb13beaff93a61577029176d0117b0c53b8e6',
+        revocationList: '0x3458b9bfc7963978b7d40ef225177c45193c2889902357db3b043a4e319a9627',
+        namespace: '0x6B6B873eaB06D331fFA6c431aC874Ff954A2c317',
+      },
+    };
+    const result = await newPluginInstance.checkStatus(credential, didDoc);
+    expect(result).toEqual({ revoked: false });
+  });
+
+  it('should throw if no default mainnet provider is given in custom ChainConnectionInstruction', async () => {
+    const newPluginInstance = new EthrRevocationRegistry({
+      defaultRegistryAddress: '0x',
+      chainConnectionInstructions: [{
+        chainId: 7777,
+        provider: new ethers.providers.JsonRpcProvider('')
+      }]
+    })
+
+    const credential = {
+      credentialStatus: {
+        id: '0',
+        type: 'EthrRevocationRegistry',
+        revocationKey: '0x89343794d2fb7dd5d0fba9593a4bb13beaff93a61577029176d0117b0c53b8e6',
+        revocationList: '0x3458b9bfc7963978b7d40ef225177c45193c2889902357db3b043a4e319a9627',
+        namespace: '0x6B6B873eaB06D331fFA6c431aC874Ff954A2c317',
+      },
+    };
+
+    await expect(newPluginInstance.checkStatus(credential, didDoc)).rejects.toThrow();
+  });
+
   it('should throw error for credential with unsupported chainId', async () => {
     const credential = {
       credentialStatus: {
@@ -101,7 +147,11 @@ describe('EthrRevocationRegistryPlugin', () => {
       },
     };
     await expect(pluginInstance.checkStatus(credential, didDoc)).rejects.toEqual(
-      new Error('bad_request: chainId is not supported'),
+      new Error('No revocation controller found for specified chainId/ revocation registry address. Recheck plugins configuration.'),
     );
   });
+
+  it ('should throw error if no config options are given in constructor', async () => {
+    expect(() => new EthrRevocationRegistry({})).toThrow()
+  })
 });

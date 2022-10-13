@@ -19,19 +19,19 @@ A [`CredentialStatusPlugin`](https://github.com/uport-project/veramo/tree/next/p
       plugins: [
         new CredentialStatusPlugin({
           ...new EthrRevocationRegistry({
-            infuraProjectId: "abcde123",                            
-            defaultRegistryAddress: "0x0000000000000000000000000000000000000000"
+            infuraProjectId: "abcde123"
           }).asStatusMethod,
           // OR
           ...new EthrRevocationRegistry({
-            defaultRegistryAddress: "0x0000000000000000000000000000000000000000",
             chainConnectionInstruction: [
               {
                 chainId: 1337,
+                address: "0x",
                 provider: new ethers.providers.JsonRpcProvider('http://127.0.0.1:8545')
               },
               {
                 chainId: 1,
+                address: "0x",
                 provider: new ethers.providers.JsonRpcProvider('http://example.mainnet.quiknode.pro/token/')
               },             
             ]

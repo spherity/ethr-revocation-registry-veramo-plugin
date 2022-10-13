@@ -8,12 +8,16 @@ jest.mock('@spherity/ethr-revocation-registry-controller', () => ({
   })),
 }));
 
+jest.mock('@spherity/ethr-revocation-registry', () => ({
+  getRevocationRegistryDeploymentAddress: jest.fn().mockReturnValue("0x"),
+}));
+
 describe('EthrRevocationRegistryPlugin', () => {
   let pluginInstance: EthrRevocationRegistry;
   const didDoc = {} as DIDDocument;
 
   beforeEach(() => {
-    pluginInstance = new EthrRevocationRegistry({ infuraProjectId: '1', defaultRegistryAddress: '1' });
+    pluginInstance = new EthrRevocationRegistry({ infuraProjectId: '1' });
   });
 
   it('should return a status method when supplied a credential object', async () => {
@@ -92,9 +96,9 @@ describe('EthrRevocationRegistryPlugin', () => {
 
   it('should handle check when provided a custom provider', async () => {
     const newPluginInstance = new EthrRevocationRegistry({
-      defaultRegistryAddress: '0x',
       chainConnectionInstructions: [{
         chainId: 7777,
+        address: "0x",
         provider: new ethers.providers.JsonRpcProvider('')
       }]
     })
@@ -115,9 +119,9 @@ describe('EthrRevocationRegistryPlugin', () => {
 
   it('should throw if no default mainnet provider is given in custom ChainConnectionInstruction', async () => {
     const newPluginInstance = new EthrRevocationRegistry({
-      defaultRegistryAddress: '0x',
       chainConnectionInstructions: [{
         chainId: 7777,
+        address: '0x',
         provider: new ethers.providers.JsonRpcProvider('')
       }]
     })

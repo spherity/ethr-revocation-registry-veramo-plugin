@@ -6,10 +6,10 @@ import { ethers } from 'ethers';
 import { Provider } from '@ethersproject/providers';
 import { decodeJWT } from 'did-jwt';
 import { StatusEntry } from 'credential-status/src';
+import {getRevocationRegistryDeploymentAddress} from "@spherity/ethr-revocation-registry";
 
 export interface EthrRevocationRegistryConfig {
   infuraProjectId?: string;
-  defaultRegistryAddress?: string;
   chainConnectionInstructions?: ChainConnectionInstruction[];
 }
 
@@ -23,55 +23,58 @@ type RegistryControllers = {
 
 type ChainConnectionInstruction = {
   chainId: number;
+  address: string;
   provider: Provider;
 }
 
+type ChainIdInfuraSubdomainPair = {
+  chainId: number;
+  subdomain: string;
+}
+
+const chainIdInfuraSubdomains: ChainIdInfuraSubdomainPair[] = [
+  {
+    chainId: 1,
+    subdomain: "mainnet"
+  },
+  {
+    chainId: 5,
+    subdomain: "goerli"
+  },
+  {
+    chainId: 11155111,
+    subdomain: "sepolia"
+  }
+]
+
+const defaultMainnetAddress = getRevocationRegistryDeploymentAddress(5)
+
 export class EthrRevocationRegistry implements StatusResolver {
   infuraProjectId?: string;
-  defaultRegistryAddress?: string;
-  controllers?: RegistryControllers;
+  controllers: RegistryControllers = {};
 
   constructor(config: EthrRevocationRegistryConfig) {
-    if (config.infuraProjectId && config.defaultRegistryAddress) {
+    if (config.infuraProjectId) {
       this.infuraProjectId = config.infuraProjectId;
-      this.defaultRegistryAddress = config.defaultRegistryAddress;
-      this.controllers = {
-        [this.defaultRegistryAddress]: {
-          1: new EthereumRevocationRegistryController({
-            address: this.defaultRegistryAddress,
-            provider: new ethers.providers.JsonRpcProvider(`https://mainnet.infura.io/v3/${this.infuraProjectId}`),
-          }),
-          3: new EthereumRevocationRegistryController({
-            address: this.defaultRegistryAddress,
-            provider: new ethers.providers.JsonRpcProvider(`https://ropsten.infura.io/v3/${this.infuraProjectId}`),
-          }),
-          42: new EthereumRevocationRegistryController({
-            address: this.defaultRegistryAddress,
-            provider: new ethers.providers.JsonRpcProvider(`https://kovan.infura.io/v3/${this.infuraProjectId}`),
-          }),
-          4: new EthereumRevocationRegistryController({
-            address: this.defaultRegistryAddress,
-            provider: new ethers.providers.JsonRpcProvider(`https://rinkeby.infura.io/v3/${this.infuraProjectId}`),
-          }),
-          5: new EthereumRevocationRegistryController({
-            address: this.defaultRegistryAddress,
-            provider: new ethers.providers.JsonRpcProvider(`https://goerli.infura.io/v3/${this.infuraProjectId}`),
-          }),
-          11155111: new EthereumRevocationRegistryController({
-            address: this.defaultRegistryAddress,
-            provider: new ethers.providers.JsonRpcProvider(`https://sepolia.infura.io/v3/${this.infuraProjectId}`),
-          }),
-        },
-      };
-    } else if (config.chainConnectionInstructions && config.defaultRegistryAddress) {
-      this.defaultRegistryAddress = config.defaultRegistryAddress;
-      if (!this.controllers) {
-        this.controllers = { [this.defaultRegistryAddress]: {} };
-      }
+
+      chainIdInfuraSubdomains.forEach((pair) => {
+        try {
+          const address = getRevocationRegistryDeploymentAddress(pair.chainId)
+          if(!this.controllers[address]) this.controllers[address] = {};
+          this.controllers[address][pair.chainId] = new EthereumRevocationRegistryController({
+            address,
+            provider: new ethers.providers.JsonRpcProvider(`https://${pair.subdomain}.infura.io/v3/${this.infuraProjectId}`),
+          })
+        } catch (error) {
+          // tslint:disable-next-line:no-console
+          console.log(`Error creating the EthereumRevocationRegistryController for chainId '${pair.chainId}'!`)
+        }
+      });
+    } else if (config.chainConnectionInstructions) {
       config.chainConnectionInstructions.forEach(instruction => {
-        this.controllers![this.defaultRegistryAddress!] = {
+        this.controllers[instruction.address] = {
           [instruction.chainId]: new EthereumRevocationRegistryController({
-            address: this.defaultRegistryAddress,
+            address: instruction.address,
             provider: instruction.provider,
           }),
         };
@@ -116,8 +119,18 @@ export class EthrRevocationRegistry implements StatusResolver {
     let revoked: boolean;
 
     if (statusEntry.chainId) {
-      // Respect VC's the chainId and if available the registry address.
-      const registry = statusEntry.registry ?? this.defaultRegistryAddress;
+      // Respect the VC's chainId and if available the registry address.
+      let registry;
+      if(!registry) {
+        try {
+          registry = getRevocationRegistryDeploymentAddress(statusEntry.chainId);
+        } catch(error) {
+          throw new Error(`ChainId found but address is missing in credential status. Error: ${error}`)
+        }
+      } else {
+        registry = statusEntry.registry;
+      }
+
       const controller = this.controllers![registry][statusEntry.chainId];
       if (!controller) {
         throw new Error(`No revocation controller found for specified chainId/ revocation registry address. Recheck plugins configuration.`);
@@ -129,7 +142,7 @@ export class EthrRevocationRegistry implements StatusResolver {
       });
     } else {
       // If VC doesn't specify registry address & chainId, use provided default registry address and lookup on mainnet
-      const controller = this.controllers![this.defaultRegistryAddress!][1];
+      const controller = this.controllers[defaultMainnetAddress][5];
       if (!controller) {
         throw new Error(`No revocation controller found for default mainnet. Recheck plugins configuration.`);
       }

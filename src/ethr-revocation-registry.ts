@@ -121,7 +121,7 @@ export class EthrRevocationRegistry implements StatusResolver {
     if (statusEntry.chainId) {
       // Respect the VC's chainId and if available the registry address.
       let registry;
-      if(!registry) {
+      if(!statusEntry.registry) {
         try {
           registry = getRevocationRegistryDeploymentAddress(statusEntry.chainId);
         } catch(error) {

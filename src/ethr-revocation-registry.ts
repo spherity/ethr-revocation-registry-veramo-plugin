@@ -120,7 +120,17 @@ export class EthrRevocationRegistry implements StatusResolver {
 
     if (statusEntry.chainId) {
       // Respect the VC's chainId and if available the registry address.
-      const registry = statusEntry.registry ?? defaultMainnetAddress;
+      let registry;
+      if(!registry) {
+        try {
+          registry = getRevocationRegistryDeploymentAddress(statusEntry.chainId);
+        } catch(error) {
+          throw new Error(`ChainId found but address is missing in credential status. Error: ${error}`)
+        }
+      } else {
+        registry = statusEntry.registry;
+      }
+
       const controller = this.controllers![registry][statusEntry.chainId];
       if (!controller) {
         throw new Error(`No revocation controller found for specified chainId/ revocation registry address. Recheck plugins configuration.`);

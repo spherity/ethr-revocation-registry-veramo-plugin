@@ -154,5 +154,5 @@ export class EthrRevocationRegistry implements StatusResolver {
     }
     return { revoked };
   };
-  asStatusMethod = { EthrRevocationRegistry: this.checkStatus };
+  asStatusMethod = { EthrRevocationRegistry2022: this.checkStatus };
 }

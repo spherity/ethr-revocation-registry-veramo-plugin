@@ -2,8 +2,7 @@ import { CredentialJwtOrJSON, StatusMethod, StatusResolver } from 'credential-st
 import {
   EthereumRevocationRegistryController,
 } from '@spherity/ethr-revocation-registry-controller';
-import { ethers } from 'ethers';
-import { Provider } from '@ethersproject/providers';
+import {ethers, JsonRpcProvider, Provider} from 'ethers';
 import { decodeJWT } from 'did-jwt';
 import { StatusEntry } from 'credential-status/src';
 import {getRevocationRegistryDeploymentAddress} from "@spherity/ethr-revocation-registry";
@@ -63,7 +62,7 @@ export class EthrRevocationRegistry implements StatusResolver {
           if(!this.controllers[address]) this.controllers[address] = {};
           this.controllers[address][pair.chainId] = new EthereumRevocationRegistryController({
             address,
-            provider: new ethers.providers.JsonRpcProvider(`https://${pair.subdomain}.infura.io/v3/${this.infuraProjectId}`),
+            provider: new JsonRpcProvider(`https://${pair.subdomain}.infura.io/v3/${this.infuraProjectId}`),
           })
         } catch (error) {
           // tslint:disable-next-line:no-console

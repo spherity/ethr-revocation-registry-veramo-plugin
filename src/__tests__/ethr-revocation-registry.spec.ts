@@ -1,6 +1,6 @@
 import { EthrRevocationRegistry } from '../ethr-revocation-registry';
 import { DIDDocument } from '@veramo/core';
-import { ethers } from 'ethers';
+import { JsonRpcProvider } from 'ethers';
 
 jest.mock('@spherity/ethr-revocation-registry-controller', () => ({
   EthereumRevocationRegistryController: jest.fn().mockImplementation(() => ({
@@ -99,7 +99,7 @@ describe('EthrRevocationRegistryPlugin', () => {
       chainConnectionInstructions: [{
         chainId: 7777,
         address: "0x",
-        provider: new ethers.providers.JsonRpcProvider('')
+        provider: new JsonRpcProvider('')
       }]
     })
 
@@ -122,7 +122,7 @@ describe('EthrRevocationRegistryPlugin', () => {
       chainConnectionInstructions: [{
         chainId: 7777,
         address: '0x',
-        provider: new ethers.providers.JsonRpcProvider('')
+        provider: new JsonRpcProvider('')
       }]
     })
 

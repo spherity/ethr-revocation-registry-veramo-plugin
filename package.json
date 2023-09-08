@@ -1,6 +1,6 @@
 {
   "name": "@spherity/ethr-revocation-registry-veramo-plugin",
-  "version": "2.0.0",
+  "version": "2.1.0",
   "description": "A plugin for the Veramo agent enabling it to resolve EthrStatusRegistry VC revocation information",
   "main": "dist/src/index.js",
   "typings": "dist/src/index.d.ts",
@@ -48,10 +48,10 @@
     "typescript": "^4.8.3"
   },
   "dependencies": {
-    "@spherity/ethr-revocation-registry": "^1.0.11",
-    "@spherity/ethr-revocation-registry-controller": "^1.2.7",
+    "@spherity/ethr-revocation-registry": "^1.1.1",
+    "@spherity/ethr-revocation-registry-controller": "^1.3.1",
     "@veramo/core": "^4.0.0",
     "credential-status": "^2.0.5",
-    "ethers": "^5.7.1"
+    "ethers": "^6.7.1"
   }
 }
